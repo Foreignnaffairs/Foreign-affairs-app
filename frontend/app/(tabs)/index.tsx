@@ -74,7 +74,7 @@ export default function Departures() {
       <View style={[styles.container, styles.center, { padding: spacing.xl }]}>
         <Ionicons name="cloud-offline-outline" size={48} color={colors.onSurfaceSecondary} />
         <Text style={styles.emptyTitle}>Flight tracking offline</Text>
-        <Text style={styles.emptyText}>We couldn't reach the tower.</Text>
+        <Text style={styles.emptyText}>{"We couldn't reach the tower."}</Text>
         <Pressable testID="retry-button" style={styles.retryBtn} onPress={load}>
           <Text style={styles.retryText}>RETRY</Text>
         </Pressable>

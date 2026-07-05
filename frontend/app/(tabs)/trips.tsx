@@ -26,12 +26,10 @@ export default function MyTrips() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [phone, setPhone] = useState<string | null>(null);
   const [lookupPhone, setLookupPhone] = useState("");
 
   const load = useCallback(async () => {
     const saved = await storage.getItem<string>("fa_phone", "");
-    setPhone(saved || null);
     if (saved) {
       try {
         const data = await api.getBookings(saved);

@@ -24,10 +24,11 @@ import { storage } from "@/src/utils/storage";
 const STICKY_H = 96;
 
 export default function Checkout() {
-  const { flightId, classKey, qty } = useLocalSearchParams<{
+  const { flightId, classKey, qty, seatLabels } = useLocalSearchParams<{
     flightId: string;
     classKey: string;
     qty: string;
+    seatLabels: string;
   }>();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -38,7 +39,9 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const quantity = Math.max(1, parseInt(qty || "1", 10));
+  const labels = (seatLabels || "").split(",").filter(Boolean);
+  const isSeated = labels.length > 0;
+  const quantity = isSeated ? labels.length : Math.max(1, parseInt(qty || "1", 10));
 
   const load = useCallback(async () => {
     const data = await api.getFlight(flightId);
@@ -65,6 +68,10 @@ export default function Checkout() {
 
   const seat = flight.classes.find((c) => c.key === classKey)!;
   const total = seat.price * quantity;
+  const seatNames = flight.seats
+    .filter((s) => labels.includes(s.label))
+    .map((s) => s.name)
+    .join(", ");
   const { date, time } = formatDeparture(flight.departure);
   const valid = name.trim().length >= 2 && phone.trim().length >= 7;
 
@@ -79,7 +86,8 @@ export default function Checkout() {
       const booking = await api.createBooking({
         flight_id: flight.id,
         class_key: seat.key,
-        quantity,
+        quantity: isSeated ? undefined : quantity,
+        seat_labels: isSeated ? labels : undefined,
         passenger_name: name.trim(),
         passenger_phone: phone.trim(),
       });
@@ -131,6 +139,12 @@ export default function Checkout() {
             <SumItem label="PILOT" value={flight.pilot} />
           </View>
           <View style={styles.sumDivider} />
+          {isSeated && (
+            <View style={styles.seatChips}>
+              <Text style={styles.seatChipsLabel}>YOUR {seat.unit.toUpperCase()}{quantity > 1 ? "S" : ""}</Text>
+              <Text style={styles.seatChipsValue}>{seatNames}</Text>
+            </View>
+          )}
           <View style={styles.priceLine}>
             <Text style={styles.priceLineText}>
               {seat.name} × {quantity} {seat.unit}
@@ -309,6 +323,21 @@ const styles = StyleSheet.create({
   priceLine: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  seatChips: {
+    marginBottom: spacing.md,
+  },
+  seatChipsLabel: {
+    fontFamily: fonts.mono,
+    color: colors.onSurfaceSecondary,
+    fontSize: 9,
+    letterSpacing: 1.5,
+    marginBottom: 3,
+  },
+  seatChipsValue: {
+    fontFamily: fonts.monoBold,
+    color: colors.brand,
+    fontSize: font.base,
   },
   priceLineText: {
     fontFamily: fonts.mono,

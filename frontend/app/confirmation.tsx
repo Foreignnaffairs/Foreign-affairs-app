@@ -71,7 +71,7 @@ export default function Confirmation() {
             <Ionicons name="checkmark" size={34} color={colors.onBrand} />
           </Animated.View>
           <Animated.Text entering={FadeInDown.delay(200).duration(400)} style={styles.confirmed}>
-            YOU'RE BOARDED
+            {"YOU'RE BOARDED"}
           </Animated.Text>
           <Animated.Text entering={FadeInDown.delay(300).duration(400)} style={styles.confirmSub}>
             Reservation confirmed · payment simulated

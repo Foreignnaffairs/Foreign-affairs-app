@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 2 — per-seat inventory + floor plan validated end-to-end. Backend: 18/18 pytest tests PASSED (flights each expose 16 seats [12 business tables '1'..'12', 4 first-class booths 'FC1'..'FC4'] with x,y,status; Economy walk-in returns total=0, seat_label='WALK-IN', increments class.booked; Business w/ seat_labels=['N'] returns total=2500, seat_label='Table N', flips that seat.status to booked in the flight; First w/ ['FC1','FC2'] returns total=30000, quantity=2, seat_label='First Class 1, First Class 2', flips both; already-booked → 409; mismatched class → 400; empty seat_labels for business/first → 400; unknown seat → 400; unknown flight → 404; GET bookings?phone= and GET /bookings/{id} both work; GET unknown booking → 404). Frontend E2E on 390x844 for Business flow on FA 072 (Rio): flight detail → tap 'Business Class' → CTA reads 'CHOOSE TABLE' → navigates to /seatmap → renders Stardust floor plan with DJ BOOTH/BAR/ENTRANCE/WC decorations and 12 numbered tables + 4 FC booths + Available/Selected/Booked legend → tap Table 1 selects it (gold check, 'CONTINUE' enabled) → tapping FC1 (other class) does not change selection (dimmed, non-tappable) → tapping Table 1 again deselects (CTA back to 'Select a table') → tap Table 1 → CONTINUE → checkout summary shows 'Table 1', BUSINESS CLASS badge and ₱2,500 total → name 'Test Passenger' + phone '+639170099IT2' → CONFIRM & PAY (1.2s mock) → confirmation shows YOU'RE BOARDED + boarding pass Table 1 + PAID ₱2,500 + booking ref → VIEW MY TRIPS shows the pass with 'Table 1'. Revisiting the same seatmap now shows Table 1 rendered with X icon and aria-disabled=true (BOOKED state persists). Deprecation warning 'props.pointerEvents is deprecated' still emitted by an internal dependency (non-blocking, unchanged from iter 1).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "seatmap", "issues": ["Floor plan uses square aspect (RATIO=1). Table 4 sits under the 'DJ BOOTH' vertical strip (x=0.08, y=0.27) and the DJ BOOTH label overlaps its border on narrow screens. Cosmetic only — the seat is still tappable. Consider nudging Table 4 slightly to the right or narrowing the DJ BOOTH feature."]}
+    ],
+    "react_native_issues": [
+      {"component": "internal dependency (RN Web / expo-linear-gradient)", "issue": "Console warning: 'props.pointerEvents is deprecated. Use style.pointerEvents' — same warning as iteration 1, from a dependency (not user code). Non-blocking."}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_foreign_affairs.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "None required for the new seat-selection feature — backend & frontend both pass. Optional: small floor-plan polish where Table 4 sits near the DJ BOOTH label overlay.",
+    "(Carry-over from iter 1) corrupted Space Grotesk .ttf files still emit font-decode warnings in web preview; UI falls back to system fonts — not blocking but worth fixing.",
+    "(Carry-over) update whichever package still uses props.pointerEvents."
+  ],
+  "critical_code_review_comments": [
+    "server.py create_booking: validates seat class match + booked status before mutation; per-seat updates use positional filter {'seats.label': lbl} — atomic-per-seat but not multi-seat-atomic. If two clients race booking overlapping sets, one seat could book while another 409s mid-loop leaving partial state. Low-risk for a demo; consider a transaction or pre-check-then-bulk-$set if needed.",
+    "server.py: economy booking still uses classes.booked counter (good) while business/first also increment classes.booked in addition to flipping the seat — capacity/booked math therefore stays consistent for the 'X unit(s) left' summary on flight detail.",
+    "seatmap.tsx: reads seats via useFocusEffect(load) so booked state refreshes on return — verified visually.",
+    "checkout.tsx: correctly forwards seat_labels for business/first and quantity for economy; total is computed on the client and re-validated on the server.",
+    "All new interactive elements have testIDs: seat-<label>, seatmap-continue, seatmap-back. Great."
+  ],
+  "updated_files": ["/app/backend/tests/test_foreign_affairs.py (rewritten for iteration-2 seat_labels contract; 18 tests)"],
+  "success_rate": {"backend": "100% (18/18)", "frontend": "100% (Business e2e + seat persistence verified; Economy stepper unchanged from iter 1; First class same code path as Business and covered by backend tests)"},
+  "seed_data_creation": "TEST bookings created under phone '+639170000IT2' (economy 3-guest on FA 808, business 1 table on FA 234, first 2 booths on FA 511, one duplicate 409 attempt) and one under '+639170099IT2' via UI (business Table 1 on FA 072 Rio). Seats booked persist in Mongo; next tester should pick different tables/booths (e.g. skip Table 1 on FA 072 Rio; the first two available FC booths on FA 511 Berlin are now booked).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Seats booked in this run are persistent. On FA 072 (Rio) Table 1 is now booked; on FA 511 (Berlin) the first two originally-available first-class booths are booked (likely FC1+FC2). Prefer picking other seats when re-running the UI flow. Run backend tests with: pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml. To reset seats, drop the flights collection (Mongo) and restart backend to reseed.",
+  "rca_of_issue": "N/A — no failures this iteration."
+}

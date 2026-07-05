@@ -74,14 +74,17 @@ export default function FlightDetail() {
 
   const book = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push({
-      pathname: "/checkout",
-      params: {
-        flightId: flight.id,
-        classKey: selected.key,
-        qty: String(qty),
-      },
-    });
+    if (selected.key === "economy") {
+      router.push({
+        pathname: "/checkout",
+        params: { flightId: flight.id, classKey: selected.key, qty: String(qty) },
+      });
+    } else {
+      router.push({
+        pathname: "/seatmap",
+        params: { flightId: flight.id, classKey: selected.key },
+      });
+    }
   };
 
   return (
@@ -182,14 +185,12 @@ export default function FlightDetail() {
               </Animated.View>
             ))}
 
-          {/* Quantity */}
-          {!soldOut && (
+          {/* Quantity — Economy walk-in only */}
+          {!soldOut && selected.key === "economy" && (
             <View style={styles.qtyBlock}>
               <View>
-                <Text style={styles.sectionLabel}>
-                  {selected.unit === "table" ? "TABLES" : "SEATS"}
-                </Text>
-                <Text style={styles.remaining}>{remaining} left</Text>
+                <Text style={styles.sectionLabel}>HOW MANY GUESTS</Text>
+                <Text style={styles.remaining}>Free entry · walk-in</Text>
               </View>
               <View style={styles.stepper}>
                 <Pressable
@@ -205,9 +206,7 @@ export default function FlightDetail() {
                 <Pressable
                   testID="qty-increment"
                   style={styles.stepBtn}
-                  onPress={() =>
-                    setQty((q) => Math.min(remaining, q + 1))
-                  }
+                  onPress={() => setQty((q) => Math.min(remaining, q + 1))}
                 >
                   <Ionicons name="add" size={20} color={colors.onSurface} />
                 </Pressable>
@@ -223,8 +222,12 @@ export default function FlightDetail() {
         style={[styles.cta, { paddingBottom: insets.bottom + spacing.md }]}
       >
         <View>
-          <Text style={styles.ctaLabel}>TOTAL</Text>
-          <Text style={styles.ctaTotal}>{priceLabel(total)}</Text>
+          <Text style={styles.ctaLabel}>
+            {selected.key === "economy" ? "TOTAL" : `PER ${selected.unit.toUpperCase()}`}
+          </Text>
+          <Text style={styles.ctaTotal}>
+            {selected.key === "economy" ? priceLabel(total) : priceLabel(selected.price)}
+          </Text>
         </View>
         <Pressable
           testID="book-button"
@@ -233,10 +236,18 @@ export default function FlightDetail() {
           style={[styles.bookBtn, soldOut && styles.bookBtnDisabled]}
         >
           <Text style={styles.bookText}>
-            {soldOut ? "SOLD OUT" : "BOOK SEAT"}
+            {soldOut
+              ? "SOLD OUT"
+              : selected.key === "economy"
+                ? "BOOK SEAT"
+                : `CHOOSE ${selected.unit.toUpperCase()}`}
           </Text>
           {!soldOut && (
-            <Ionicons name="airplane" size={16} color={colors.onBrand} />
+            <Ionicons
+              name={selected.key === "economy" ? "airplane" : "grid"}
+              size={16}
+              color={colors.onBrand}
+            />
           )}
         </Pressable>
       </Animated.View>

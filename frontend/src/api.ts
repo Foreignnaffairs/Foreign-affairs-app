@@ -11,6 +11,15 @@ export type SeatClass = {
   booked: number;
 };
 
+export type Seat = {
+  label: string;
+  name: string;
+  class_key: string;
+  x: number;
+  y: number;
+  status: string;
+};
+
 export type Flight = {
   id: string;
   flight_number: string;
@@ -26,6 +35,7 @@ export type Flight = {
   image_url: string;
   description: string;
   classes: SeatClass[];
+  seats: Seat[];
 };
 
 export type Booking = {
@@ -76,7 +86,8 @@ export const api = {
   createBooking: (payload: {
     flight_id: string;
     class_key: string;
-    quantity: number;
+    quantity?: number;
+    seat_labels?: string[];
     passenger_name: string;
     passenger_phone: string;
   }) =>
