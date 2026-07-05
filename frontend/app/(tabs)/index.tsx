@@ -70,9 +70,20 @@ export default function Departures() {
         >
           FOREIGN AFFAIRS
         </Text>
-        <View style={styles.liveDot}>
-          <View style={styles.dot} />
-          <Text style={styles.liveText}>LIVE</Text>
+        <View style={styles.headerRight}>
+          <View style={styles.liveDot}>
+            <View style={styles.dot} />
+            <Text style={styles.liveText}>LIVE</Text>
+          </View>
+          <Pressable
+            testID="admin-entry"
+            onPress={() => router.push("/admin-login")}
+            hitSlop={12}
+            style={styles.crewBtn}
+          >
+            <Ionicons name="lock-closed" size={13} color={colors.onSurfaceSecondary} />
+            <Text style={styles.crewText}>CREW</Text>
+          </Pressable>
         </View>
       </View>
       <Text style={styles.title}>DEPARTURES</Text>
@@ -184,6 +195,23 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
   },
   liveDot: { flexDirection: "row", alignItems: "center", gap: 5 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+  crewBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderStrong,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  crewText: {
+    fontFamily: fonts.mono,
+    color: colors.onSurfaceSecondary,
+    fontSize: 10,
+    letterSpacing: 1.5,
+  },
   dot: {
     width: 6,
     height: 6,
