@@ -107,7 +107,7 @@ def _seed_flights() -> List[dict]:
     def biz(cap):
         return SeatClass(key="business", name="Business Class", tagline="Cocktail table + bottle",
                          perks=["Cocktail table (3–6 pax)", "1 bottle included", "Priority entry", "Dedicated server"],
-                         price=6500, unit="table", capacity=cap)
+                         price=2500, unit="table", capacity=cap)
 
     def first(cap):
         return SeatClass(key="first", name="First Class", tagline="Private booth + premium bottles",
