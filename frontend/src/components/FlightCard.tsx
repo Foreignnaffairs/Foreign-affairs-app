@@ -83,7 +83,7 @@ function FlightCardBase({ flight, onPress, index }: Props) {
           <View style={[styles.metaItem, { alignItems: "flex-end", flex: 0 }]}>
             <Text style={styles.metaLabel}>FROM</Text>
             <Text style={styles.priceValue}>
-              ₱{fromPrice.toLocaleString("en-PH")}
+              {fromPrice === 0 ? "FREE" : "₱" + fromPrice.toLocaleString("en-PH")}
             </Text>
           </View>
         </View>

@@ -61,3 +61,5 @@ export const CLASS_META: Record<
 };
 
 export const peso = (n: number) => "₱" + n.toLocaleString("en-PH");
+
+export const priceLabel = (n: number) => (n === 0 ? "FREE" : peso(n));

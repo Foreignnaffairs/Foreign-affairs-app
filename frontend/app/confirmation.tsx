@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 
-import { colors, fonts, font, spacing, peso } from "@/src/theme";
+import { colors, fonts, font, spacing, priceLabel } from "@/src/theme";
 import { api, Booking } from "@/src/api";
 import { BoardingPass } from "@/src/components/BoardingPass";
 
@@ -83,8 +83,10 @@ export default function Confirmation() {
         </Animated.View>
 
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>PAID</Text>
-          <Text style={styles.totalValue}>{peso(booking.total)}</Text>
+          <Text style={styles.totalLabel}>
+            {booking.total === 0 ? "ADMISSION" : "PAID"}
+          </Text>
+          <Text style={styles.totalValue}>{priceLabel(booking.total)}</Text>
         </View>
 
         <Pressable testID="share-button" style={styles.shareBtn} onPress={share}>

@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
-import { colors, fonts, font, spacing, radius, peso } from "@/src/theme";
+import { colors, fonts, font, spacing, radius, priceLabel } from "@/src/theme";
 import { api, Flight, SeatClass, formatDeparture } from "@/src/api";
 
 export default function FlightDetail() {
@@ -196,7 +196,7 @@ export default function FlightDetail() {
       >
         <View>
           <Text style={styles.ctaLabel}>TOTAL</Text>
-          <Text style={styles.ctaTotal}>{peso(total)}</Text>
+          <Text style={styles.ctaTotal}>{priceLabel(total)}</Text>
         </View>
         <Pressable
           testID="book-button"
@@ -263,8 +263,8 @@ function ClassRow({
           <Text style={styles.classTagline}>{seat.tagline}</Text>
         </View>
         <View style={{ alignItems: "flex-end" }}>
-          <Text style={styles.classPrice}>{peso(seat.price)}</Text>
-          <Text style={styles.classUnit}>/{seat.unit}</Text>
+          <Text style={styles.classPrice}>{priceLabel(seat.price)}</Text>
+          {seat.price > 0 && <Text style={styles.classUnit}>/{seat.unit}</Text>}
         </View>
       </View>
 

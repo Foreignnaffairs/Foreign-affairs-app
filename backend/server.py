@@ -100,19 +100,19 @@ def _seed_flights() -> List[dict]:
     now = datetime.now(timezone.utc)
 
     def eco(cap):
-        return SeatClass(key="economy", name="Economy", tagline="General admission entry",
-                         perks=["Dancefloor access", "Welcome shot on arrival", "Coat check"],
-                         price=800, unit="seat", capacity=cap)
+        return SeatClass(key="economy", name="Economy", tagline="Free entry — dancefloor only",
+                         perks=["Standing / dancefloor access", "No table or bottle", "Coat check"],
+                         price=0, unit="seat", capacity=cap)
 
     def biz(cap):
         return SeatClass(key="business", name="Business Class", tagline="Cocktail table + bottle",
-                         perks=["Reserved cocktail table (4 pax)", "1 house bottle included", "Priority entry", "Dedicated server"],
+                         perks=["Cocktail table (3–6 pax)", "1 bottle included", "Priority entry", "Dedicated server"],
                          price=6500, unit="table", capacity=cap)
 
     def first(cap):
-        return SeatClass(key="first", name="First Class", tagline="Premium booth + premium bottle",
-                         perks=["Premium booth (8 pax)", "2 premium bottles included", "Skip-the-line VIP entry", "Personal host & mixers", "Best view of the pilot"],
-                         price=15000, unit="table", capacity=cap)
+        return SeatClass(key="first", name="First Class", tagline="Private booth + premium bottles",
+                         perks=["Private booth (up to 10 pax)", "2 premium bottles included", "Skip-the-line VIP entry", "Personal host & mixers", "Best view of the pilot"],
+                         price=15000, unit="booth", capacity=cap)
 
     flights = [
         Flight(

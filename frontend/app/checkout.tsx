@@ -17,7 +17,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { colors, fonts, font, spacing, radius, peso } from "@/src/theme";
+import { colors, fonts, font, spacing, radius, priceLabel } from "@/src/theme";
 import { api, Flight, formatDeparture } from "@/src/api";
 import { storage } from "@/src/utils/storage";
 
@@ -136,7 +136,7 @@ export default function Checkout() {
               {seat.name} × {quantity} {seat.unit}
               {quantity > 1 ? "s" : ""}
             </Text>
-            <Text style={styles.priceLineText}>{peso(total)}</Text>
+            <Text style={styles.priceLineText}>{priceLabel(total)}</Text>
           </View>
         </View>
 
@@ -167,9 +167,15 @@ export default function Checkout() {
         />
 
         <View style={styles.mockNote}>
-          <Ionicons name="card-outline" size={16} color={colors.brandSecondary} />
+          <Ionicons
+            name={total === 0 ? "ticket-outline" : "card-outline"}
+            size={16}
+            color={colors.brandSecondary}
+          />
           <Text style={styles.mockNoteText}>
-            Payment is simulated for now — no card required.
+            {total === 0
+              ? "Free general admission — reserve your spot below."
+              : "Payment is simulated for now — no card required."}
           </Text>
         </View>
 
@@ -183,8 +189,10 @@ export default function Checkout() {
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
         <View style={[styles.sticky, { paddingBottom: insets.bottom + spacing.md }]}>
           <View>
-            <Text style={styles.stickyLabel}>TOTAL DUE</Text>
-            <Text style={styles.stickyTotal}>{peso(total)}</Text>
+            <Text style={styles.stickyLabel}>
+              {total === 0 ? "TOTAL" : "TOTAL DUE"}
+            </Text>
+            <Text style={styles.stickyTotal}>{priceLabel(total)}</Text>
           </View>
           <Pressable
             testID="confirm-button"
@@ -196,7 +204,9 @@ export default function Checkout() {
               <ActivityIndicator color={colors.onBrand} />
             ) : (
               <>
-                <Text style={styles.payText}>CONFIRM & PAY</Text>
+                <Text style={styles.payText}>
+                  {total === 0 ? "RESERVE SEAT" : "CONFIRM & PAY"}
+                </Text>
                 <Ionicons name="lock-closed" size={15} color={colors.onBrand} />
               </>
             )}
