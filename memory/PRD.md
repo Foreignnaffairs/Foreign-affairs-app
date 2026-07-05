@@ -52,4 +52,20 @@ must be paid for.
   seat map for Economy; add-to-calendar; promo codes.
 
 ## Next Tasks
-- Await user feedback; likely next: admin panel for managing flights, then real payments.
+- Await user feedback. Optional: raise on missing ADMIN_PIN in production; real payments.
+
+## Iteration 3 (2026-07-05) — Admin panel + past flights + live availability
+- Admin PIN gate (X-Admin-PIN header, secrets.compare_digest; PIN in backend .env = 602214).
+  Endpoints: POST /api/admin/verify-pin, GET/POST /api/admin/flights, PUT/DELETE /api/admin/flights/{id},
+  POST /api/admin/flights/{id}/reset-seats. Seats auto-generated from business_tables(≤12)+first_booths(≤4),
+  preserving booked seats on edit.
+- Frontend admin: hidden entry via long-press on "FOREIGN AFFAIRS" logo → /admin-login (PIN) → "Crew" tab
+  appears (adminStore + useSyncExternalStore). Dashboard lists flights (LANDED/UPCOMING, table/booth counts),
+  Add/Edit form (/admin-flight) with preset gallery + device photo upload (expo-image-picker, permission-handled),
+  Reset seats, Delete, Lock.
+- Past flights are shown (not hidden), labeled "LANDED"; flight detail hides booking and shows a
+  "View photos from the night" button linking to the admin-set Google Drive gallery_url. Booking a past
+  flight is blocked (400). Seeded past flight: Seoul FA 019.
+- Live availability heat indicator: seat map banner ("N of M tables left · selling fast 🔥") + gold glow on
+  remaining seats when low; flight-detail class rows show dynamic "selling fast" urgency.
+- Tested: backend 20/20 pytest passed; full admin + guest flows passed.
