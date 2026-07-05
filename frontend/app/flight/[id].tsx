@@ -14,6 +14,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
 import { colors, fonts, font, spacing, radius, peso } from "@/src/theme";
 import { api, Flight, SeatClass, formatDeparture } from "@/src/api";
@@ -110,7 +111,7 @@ export default function FlightDetail() {
             <Ionicons name="chevron-back" size={22} color={colors.onSurface} />
           </Pressable>
 
-          <View style={styles.heroContent}>
+          <Animated.View entering={FadeInDown.duration(500).springify().damping(18)} style={styles.heroContent}>
             <Text style={styles.flightNo}>{flight.flight_number}</Text>
             <Text style={styles.destination}>{flight.destination}</Text>
             <Text style={styles.tagline}>{flight.tagline}</Text>
@@ -121,7 +122,7 @@ export default function FlightDetail() {
                 </View>
               ))}
             </View>
-          </View>
+          </Animated.View>
         </View>
 
         {/* Flight info strip */}
@@ -136,17 +137,21 @@ export default function FlightDetail() {
           <Text style={styles.description}>{flight.description}</Text>
 
           <Text style={styles.sectionLabel}>SELECT YOUR CLASS</Text>
-          {flight.classes.map((c) => (
-            <ClassRow
+          {flight.classes.map((c, i) => (
+            <Animated.View
               key={c.key}
-              seat={c}
-              selected={c.key === selectedKey}
-              onSelect={() => {
-                Haptics.selectionAsync();
-                setSelectedKey(c.key);
-                setQty(1);
-              }}
-            />
+              entering={FadeInDown.delay(120 + i * 80).duration(400).springify().damping(18)}
+            >
+              <ClassRow
+                seat={c}
+                selected={c.key === selectedKey}
+                onSelect={() => {
+                  Haptics.selectionAsync();
+                  setSelectedKey(c.key);
+                  setQty(1);
+                }}
+              />
+            </Animated.View>
           ))}
 
           {/* Quantity */}
@@ -185,7 +190,8 @@ export default function FlightDetail() {
       </ScrollView>
 
       {/* Sticky CTA */}
-      <View
+      <Animated.View
+        entering={FadeIn.delay(250).duration(400)}
         style={[styles.cta, { paddingBottom: insets.bottom + spacing.md }]}
       >
         <View>
@@ -205,7 +211,7 @@ export default function FlightDetail() {
             <Ionicons name="airplane" size={16} color={colors.onBrand} />
           )}
         </Pressable>
-      </View>
+      </Animated.View>
     </View>
   );
 }

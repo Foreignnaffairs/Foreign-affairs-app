@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { colors, fonts, font, spacing, radius } from "@/src/theme";
 import { api, Booking } from "@/src/api";
@@ -124,10 +125,13 @@ export default function MyTrips() {
         keyExtractor={(b) => b.id}
         ListHeaderComponent={header}
         ListEmptyComponent={empty}
-        renderItem={({ item }) => (
-          <View style={{ marginBottom: spacing.xl }}>
+        renderItem={({ item, index }) => (
+          <Animated.View
+            entering={FadeInDown.delay(index * 90).duration(450).springify().damping(18)}
+            style={{ marginBottom: spacing.xl }}
+          >
             <BoardingPass booking={item} />
-          </View>
+          </Animated.View>
         )}
         contentContainerStyle={{
           paddingTop: insets.top + spacing.sm,

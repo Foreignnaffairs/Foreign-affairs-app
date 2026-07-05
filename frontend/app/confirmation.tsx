@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 
 import { colors, fonts, font, spacing, peso } from "@/src/theme";
 import { api, Booking } from "@/src/api";
@@ -63,16 +64,23 @@ export default function Confirmation() {
         }}
       >
         <View style={styles.checkWrap}>
-          <View style={styles.checkCircle}>
+          <Animated.View
+            entering={ZoomIn.duration(500).springify().damping(12)}
+            style={styles.checkCircle}
+          >
             <Ionicons name="checkmark" size={34} color={colors.onBrand} />
-          </View>
-          <Text style={styles.confirmed}>YOU'RE BOARDED</Text>
-          <Text style={styles.confirmSub}>
+          </Animated.View>
+          <Animated.Text entering={FadeInDown.delay(200).duration(400)} style={styles.confirmed}>
+            YOU'RE BOARDED
+          </Animated.Text>
+          <Animated.Text entering={FadeInDown.delay(300).duration(400)} style={styles.confirmSub}>
             Reservation confirmed · payment simulated
-          </Text>
+          </Animated.Text>
         </View>
 
-        <BoardingPass booking={booking} />
+        <Animated.View entering={FadeInDown.delay(400).duration(500).springify().damping(16)}>
+          <BoardingPass booking={booking} />
+        </Animated.View>
 
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>PAID</Text>

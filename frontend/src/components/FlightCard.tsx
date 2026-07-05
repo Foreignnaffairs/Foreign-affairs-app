@@ -2,9 +2,18 @@ import { memo } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 
 import { colors, fonts, font, spacing, radius } from "@/src/theme";
 import { Flight, formatDeparture } from "@/src/api";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = {
   flight: Flight;
@@ -12,15 +21,27 @@ type Props = {
   index: number;
 };
 
-function FlightCardBase({ flight, onPress }: Props) {
+function FlightCardBase({ flight, onPress, index }: Props) {
   const { date, time } = formatDeparture(flight.departure);
   const fromPrice = Math.min(...flight.classes.map((c) => c.price));
 
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   return (
-    <Pressable
+    <Animated.View entering={FadeInDown.delay(index * 90).duration(450).springify().damping(18)}>
+    <AnimatedPressable
       testID={`flight-card-${flight.id}`}
       onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      onPressIn={() => {
+        scale.value = withSpring(0.97, { damping: 18, stiffness: 220 });
+      }}
+      onPressOut={() => {
+        scale.value = withTiming(1, { duration: 180 });
+      }}
+      style={[styles.card, animStyle]}
     >
       <Image
         source={{ uri: flight.image_url }}
@@ -67,7 +88,8 @@ function FlightCardBase({ flight, onPress }: Props) {
           </View>
         </View>
       </View>
-    </Pressable>
+    </AnimatedPressable>
+    </Animated.View>
   );
 }
 
@@ -126,6 +148,7 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     fontSize: 40,
     lineHeight: 44,
+    letterSpacing: -1,
   },
   tagline: {
     fontFamily: fonts.displayMedium,
