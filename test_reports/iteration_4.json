@@ -1,0 +1,30 @@
+{
+  "summary": "Cache/stale-build verification PASSED — the frontend currently served at https://seat-reserve-67.preview.emergentagent.com is the LATEST build. All five latest-only markers render correctly on a 390x844 viewport with no bundling error, no blank screen, and no red-screen. (1) Departures list renders instantly; the 'boarding soon' subtitle shows 4 upcoming flights and the FlatList emits a 'PAST FLIGHTS' section header followed by the Seoul FA 019 card carrying a green 'LANDED' pill and a 'GALLERY / PHOTOS' label — this whole section only exists in the newest build, so its presence confirms the fresh bundle. (2) Tapping the Seoul past card opens /flight/<seoulId> which shows the 'THIS FLIGHT HAS LANDED' banner, the gallery-button labeled 'VIEW PHOTOS FROM THE NIGHT', and NO book-button (book-button count=0). (3) Direct navigation to /admin-login shows pin-input + pin-submit; entering 602214 loads admin-list (Crew Control > FLIGHTS) with FA 019 Seoul as LANDED and Tokyo/Lagos/Berlin(FA 511)/Rio(FA 072) as UPCOMING, and the bottom tab bar shows the new 'CREW' tab next to DEPARTURES and MY TRIPS. (4) Opening the upcoming Tokyo flight from Departures shows the book-button, selecting Business Class (testID class-business) then CHOOSE TABLE navigates to /seatmap?flightId=...&classKey=business where the availability-banner is visible and reads '12 of 12 tables available' with the live pulse dot over the floor plan (FC 1-4 + tables 1-12 + BAR + WC visible). Console errors: only the previously-known non-blocking RN-Web deprecation warnings (props.pointerEvents, shadow* style props) — no new errors. No fixes were needed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "internal RN Web dependency", "issue": "Carry-over console warning 'props.pointerEvents is deprecated. Use style.pointerEvents' — non-blocking, emitted from a dependency."},
+      {"component": "internal RN Web dependency", "issue": "Carry-over console warning '\"shadow*\" style props are deprecated. Use \"boxShadow\"' — non-blocking, emitted from a dependency."}
+    ]
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_4.json"
+  ],
+  "action_items": [
+    "None — stale-bundle issue is confirmed RESOLVED. The preview URL is serving the latest features (PAST FLIGHTS/Seoul-LANDED/gallery button, /admin-login + Crew tab, seatmap availability banner)."
+  ],
+  "critical_code_review_comments": [
+    "No new code review comments this iteration — this was a served-build verification only, no source changes.",
+    "As noted before: on web, the guest onLongPress FOREIGN AFFAIRS logo cannot enter admin (mouse fires press, not longPress) — /admin-login route works as the intended web fallback."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (not re-tested per request)", "frontend": "100% (5/5 latest-build markers verified on the live preview URL)"},
+  "seed_data_creation": "No new data created. Seed flights (Tokyo FA 808, Lagos FA 234, Berlin FA 511, Rio FA 072, Seoul FA 019) all render as expected. No test bookings created this run.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Stale-cache issue is resolved on the served build at EXPO_PUBLIC_BACKEND_URL. Key markers to re-verify quickly if this recurs: [data-testid=departures-list] renders → scroll to see 'PAST FLIGHTS' + Seoul FA 019 LANDED card; tap Seoul → [data-testid=gallery-button] present, [data-testid=book-button] absent; /admin-login + PIN 602214 → [data-testid=admin-list] loads + 'CREW' bottom tab visible; upcoming Tokyo → Business Class ([data-testid=class-business]) → CHOOSE TABLE → /seatmap → [data-testid=availability-banner] shows '12 of 12 tables available'. Note the Business Class selector CHOOSE TABLE lives inside a scrollable area — scroll the flight detail page down before clicking. Admin PIN is 602214 (from backend/.env).",
+  "rca_of_issue": "Original 'seeing the old version' symptom RCA: Metro/expo web served a cached JS bundle from before the PAST FLIGHTS / admin / seatmap-availability features were added. Mitigation done by main agent (clearing Metro cache + restarting Expo) has taken effect — the preview URL now serves the up-to-date bundle containing all five latest-only UI elements verified above."
+}
