@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   featureTextVertical: { transform: [{ rotate: "-90deg" }], width: 80, textAlign: "center" },
-  djBooth: { left: "0%", top: "31%", width: "9%", height: "30%" },
+  djBooth: { left: "0%", top: "34%", width: "8%", height: "26%" },
   bar: { left: "6%", top: "90%", width: "66%", height: "6%" },
   entrance: { left: "62%", top: "4%", width: "22%", height: "10%" },
   men: { left: "90%", top: "24%", width: "8%", height: "12%" },

@@ -30,13 +30,20 @@ must be paid for.
 - Boarding-pass confirmation + persistent My Trips wallet, retrievable by phone.
 
 ## Implemented (2026-07-05)
-- Backend: seeded 4 flights (Tokyo/Lagos/Berlin/Rio) each with 3 seat classes; endpoints:
-  GET /api/flights, GET /api/flights/{id}, POST /api/bookings (decrements availability,
-  generates reference + seat/table label + total), GET /api/bookings?phone=, GET /api/bookings/{id}.
-- Frontend: Departures board, Flight detail (parallax hero, class selector, perks, qty stepper,
-  sticky Book CTA), Checkout (keyboard-aware form, mock payment), Confirmation (physical
-  off-white boarding pass with barcode + share), My Trips (boarding-pass wallet + phone lookup).
-- Full-stack tested: backend 13/13 pytest passed; frontend 7/7 flows passed. Fonts fixed.
+- Backend: seeded 4 flights (Tokyo/Lagos/Berlin/Rio). Per-flight seat classes + per-seat inventory
+  (16 seats: 12 Business tables "1".."12" + 4 First Class booths "FC1".."FC4", each with x/y floor-plan
+  coords + status). Endpoints: GET /api/flights, GET /api/flights/{id},
+  POST /api/bookings (seat-aware: Economy=free walk-in by quantity; Business/First=specific seat_labels,
+  marks seats booked, 409 on already-booked), GET /api/bookings?phone=, GET /api/bookings/{id}.
+- Pricing: Economy FREE (walk-in, no table), Business ₱2,500/table (cocktail table 3–6 + bottle),
+  First ₱15,000/booth (private booth up to 10 + 2 bottles).
+- Frontend: Departures board, Flight detail (FREE ribbon on Economy under "GENERAL ADMISSION";
+  "TABLES & BOTTLES" section for paid tiers with UPGRADE pill), interactive Stardust floor-plan
+  seat picker (/seatmap — DJ booth/bar/entrance/WC context, tap to select, booked=greyed, multi-select),
+  Checkout (keyboard-aware, shows chosen tables, mock payment), Confirmation (physical boarding pass),
+  My Trips wallet + phone lookup. Staggered entrance + press-scale animations throughout.
+- Fonts: Space Grotesk (display) + JetBrains Mono (metadata), fixed valid TTFs.
+- Tested: backend 18/18 pytest passed; frontend full seat-selection + booking flow passed.
 
 ## Backlog (prioritized)
 - P0: (none — MVP complete)
