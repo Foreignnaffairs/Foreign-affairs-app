@@ -136,23 +136,51 @@ export default function FlightDetail() {
         <View style={styles.body}>
           <Text style={styles.description}>{flight.description}</Text>
 
-          <Text style={styles.sectionLabel}>SELECT YOUR CLASS</Text>
-          {flight.classes.map((c, i) => (
-            <Animated.View
-              key={c.key}
-              entering={FadeInDown.delay(120 + i * 80).duration(400).springify().damping(18)}
-            >
-              <ClassRow
-                seat={c}
-                selected={c.key === selectedKey}
-                onSelect={() => {
-                  Haptics.selectionAsync();
-                  setSelectedKey(c.key);
-                  setQty(1);
-                }}
-              />
-            </Animated.View>
-          ))}
+          <Text style={styles.sectionLabel}>GENERAL ADMISSION</Text>
+          {flight.classes
+            .filter((c) => c.price === 0)
+            .map((c, i) => (
+              <Animated.View
+                key={c.key}
+                entering={FadeInDown.delay(120 + i * 80).duration(400).springify().damping(18)}
+              >
+                <ClassRow
+                  seat={c}
+                  selected={c.key === selectedKey}
+                  onSelect={() => {
+                    Haptics.selectionAsync();
+                    setSelectedKey(c.key);
+                    setQty(1);
+                  }}
+                />
+              </Animated.View>
+            ))}
+
+          <View style={styles.upgradeHeader}>
+            <Text style={styles.sectionLabel}>TABLES & BOTTLES</Text>
+            <View style={styles.upgradePill}>
+              <Ionicons name="wine" size={12} color={colors.brand} />
+              <Text style={styles.upgradePillText}>UPGRADE</Text>
+            </View>
+          </View>
+          {flight.classes
+            .filter((c) => c.price > 0)
+            .map((c, i) => (
+              <Animated.View
+                key={c.key}
+                entering={FadeInDown.delay(200 + i * 80).duration(400).springify().damping(18)}
+              >
+                <ClassRow
+                  seat={c}
+                  selected={c.key === selectedKey}
+                  onSelect={() => {
+                    Haptics.selectionAsync();
+                    setSelectedKey(c.key);
+                    setQty(1);
+                  }}
+                />
+              </Animated.View>
+            ))}
 
           {/* Quantity */}
           {!soldOut && (
@@ -239,6 +267,7 @@ function ClassRow({
   const remaining = seat.capacity - seat.booked;
   const soldOut = remaining <= 0;
   const isFirst = seat.key === "first";
+  const isFree = seat.price === 0;
 
   return (
     <Pressable
@@ -250,6 +279,11 @@ function ClassRow({
         selected && isFirst && { borderColor: colors.brand },
       ]}
     >
+      {isFree && (
+        <View style={styles.freeRibbon}>
+          <Text style={styles.freeRibbonText}>FREE</Text>
+        </View>
+      )}
       <View style={styles.classHead}>
         <View style={{ flex: 1 }}>
           <Text
@@ -263,8 +297,12 @@ function ClassRow({
           <Text style={styles.classTagline}>{seat.tagline}</Text>
         </View>
         <View style={{ alignItems: "flex-end" }}>
-          <Text style={styles.classPrice}>{priceLabel(seat.price)}</Text>
-          {seat.price > 0 && <Text style={styles.classUnit}>/{seat.unit}</Text>}
+          {seat.price > 0 && (
+            <>
+              <Text style={styles.classPrice}>{priceLabel(seat.price)}</Text>
+              <Text style={styles.classUnit}>/{seat.unit}</Text>
+            </>
+          )}
         </View>
       </View>
 
@@ -385,6 +423,41 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginTop: spacing.xl,
     marginBottom: spacing.md,
+  },
+  upgradeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  upgradePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors.brandTertiary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radius.pill,
+  },
+  upgradePillText: {
+    fontFamily: fonts.monoBold,
+    color: colors.brand,
+    fontSize: 9,
+    letterSpacing: 1.5,
+  },
+  freeRibbon: {
+    position: "absolute",
+    top: spacing.lg,
+    right: spacing.lg,
+    backgroundColor: colors.brand,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+    borderRadius: radius.sm,
+  },
+  freeRibbonText: {
+    fontFamily: fonts.monoBold,
+    color: colors.onBrand,
+    fontSize: 12,
+    letterSpacing: 2,
   },
   classRow: {
     backgroundColor: colors.surfaceSecondary,
