@@ -1,0 +1,153 @@
+{
+  "app_name": "Foreign Affairs",
+  "personality": "6 Glass / Luxe (with 7 Dark-First Utility typography for aviation aesthetic)",
+  "personality_one_liner": "A cinematic, premium nightlife experience structured with the sharp, operational precision of an aviation departures board.",
+  "color": {
+    "surface": "#09090B",
+    "onSurface": "#F4F4F5",
+    "surfaceSecondary": "#18181B",
+    "onSurfaceSecondary": "#A1A1AA",
+    "surfaceTertiary": "#27272A",
+    "onSurfaceTertiary": "#D4D4D8",
+    "surfaceInverse": "#EFEFE8",
+    "onSurfaceInverse": "#09090B",
+    "brand": "#D0A85C",
+    "brandPrimary": "#D0A85C",
+    "onBrandPrimary": "#09090B",
+    "brandSecondary": "#E5C88F",
+    "onBrandSecondary": "#09090B",
+    "brandTertiary": "#3D311D",
+    "onBrandTertiary": "#D0A85C",
+    "success": "#3F6212",
+    "onSuccess": "#D9F99D",
+    "warning": "#9A3412",
+    "onWarning": "#FED7AA",
+    "error": "#7F1D1D",
+    "onError": "#FECACA",
+    "info": "#27272A",
+    "onInfo": "#F4F4F5",
+    "border": "#27272A",
+    "borderStrong": "#3F3F46",
+    "divider": "#1F1F22"
+  },
+  "typography": {
+    "displayFontFamily": "Space Grotesk",
+    "textFontFamily": "Geist",
+    "monoFontFamily": "JetBrains Mono",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24,
+      "3xl": 32
+    }
+  },
+  "spacing": {
+    "rule": "Generous vertical breathing room for cinematic imagery, juxtaposed with tight, grid-aligned padding for aviation metadata (boarding passes, times).",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "0",
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Use heavy glassmorphism over DJ and location photos for featured flight cards.",
+      "Use a frosted glass bottom tab bar so the dark event imagery bleeds through.",
+      "Apply dark tinted overlays (≥75% surface) under text on top of images for readability."
+    ],
+    "dont's": [
+      "Don't apply glassmorphism to the final Boarding Pass ticket (that should look solid, tactile, and physical).",
+      "Don't use glass on input fields or utility forms."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "DeparturesBoard",
+      "purpose": "A live-feel, cinematic feed of upcoming flight-themed DJ events.",
+      "states": {
+        "loading": "A dark screen with pulsing metallic skeleton placeholders shaped like flight cards.",
+        "empty": "No flights scheduled. Illustration: sleek hangar doors closed.",
+        "error": "Flight tracking offline. Retry button."
+      },
+      "layout": "Vertical scroll. Top header mimics an airport 'DEPARTURES' board with Space Mono typography. Flight cards are edge-to-edge (or lg inset) large image-led modules. Image in background, linear gradient scrim, and sharp white tech/mono typography showing 'GATE', 'PILOT', and 'TIME' overlaid on the bottom."
+    },
+    {
+      "name": "FlightDetail",
+      "purpose": "Expands the selected event into an immersive preview with seat class selection.",
+      "states": {
+        "loading": "Skeleton UI matching the hero image dimensions.",
+        "empty": "N/A",
+        "error": "Failed to load flight manifesto."
+      },
+      "layout": "Parallax hero image of the destination/DJ. Below is the 'Booking Classes' segmented control (Economy, Business, First Class). Each class displays its perks (e.g., 'Premium Tables + Bottle') with Champagne brand tertiary highlights for First Class. Sticky 'Book Seat' CTA anchored to the bottom."
+    },
+    {
+      "name": "Checkout",
+      "purpose": "Frictionless ticket reservation gathering basic passenger info.",
+      "states": {
+        "loading": "Spinner on the Confirm Button.",
+        "empty": "N/A",
+        "error": "Payment simulated failure."
+      },
+      "layout": "Single column form. Input fields with dark surfaceTertiary backgrounds. A simulated 'swipe to pay' or premium gold 'Confirm Reservation' button at the bottom."
+    },
+    {
+      "name": "MyTrips",
+      "purpose": "Digital wallet for the user's purchased boarding passes.",
+      "states": {
+        "loading": "Centered loading spinner.",
+        "empty": "A faded barcode illustration with text: 'No flights booked. Your passport is empty.'",
+        "error": "Could not retrieve boarding passes."
+      },
+      "layout": "A carousel or vertical list. CRITICAL: The boarding passes themselves use `surfaceInverse` (Off-white) with `onSurfaceInverse` (Pitch Black) mono typography. They must look like physical, premium printed flight tickets floating inside the dark app, complete with a barcode/QR block and dotted cut-lines."
+    }
+  ],
+  "images": {
+    "hero_dj_1": {
+      "url": "https://images.unsplash.com/photo-1715619684759-8203b89e88ee?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA4Mzl8MHwxfHNlYXJjaHwxfHxkYXJrJTIwY2x1YiUyMERKJTIwcGVyZm9ybWluZyUyMG5pZ2h0fGVufDB8fHx8MTc4MzI1ODMyOXww&ixlib=rb-4.1.0&q=85",
+      "alt": "DJ performing in a dark, atmospheric club setting"
+    },
+    "destination_tokyo": {
+      "url": "https://images.unsplash.com/photo-1601042879364-f3947d3f9c16?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwxfHxuZW9uJTIwdG9reW8lMjBuaWdodCUyMGRhcmt8ZW58MHx8fHwxNzgyNzQ1NTg2fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Dark neon Tokyo streets at night"
+    },
+    "bottle_service_first_class": {
+      "url": "https://images.unsplash.com/photo-1768223072089-73e4af22b7c9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwxfHxjaGFtcGFnbmUlMjBib3R0bGUlMjBzZXJ2aWNlJTIwY2x1YiUyMGRhcmt8ZW58MHx8fHwxNzgzMjU4MzI5fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Premium champagne bottle service in a dark setting"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Aesthetic requirement: Merge '6 Glass / Luxe' (premium cinematic backgrounds, champagne gold accents) with '7 Dark-First Utility' (monospaced metadata, tight aviation grid alignment).",
+    "Font usage: Use Space Grotesk for the prominent event/destination names. Use JetBrains Mono for times, gates, flight numbers, and booking references to sell the 'aviation' feel.",
+    "Contrast flip on My Trips: The app is entirely dark mode, BUT the booked Boarding Passes must be styled using the `surfaceInverse` off-white color. They should look like bright, physical printed paper tickets sitting on the dark canvas.",
+    "Always apply a dark linear-gradient scrim (top to bottom, transparent to ≥75% surface) over hero images so the white and gold text overlaid on them remains readable.",
+    "Form inputs should not float. Labels above inputs. Use surfaceTertiary for input backgrounds, completely borderless.",
+    "Use standard safe-area views. Do not let content bleed under the notch unmanaged."
+  ]
+}
