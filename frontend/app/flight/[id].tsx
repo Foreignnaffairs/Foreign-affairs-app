@@ -279,6 +279,7 @@ function ClassRow({
   const soldOut = remaining <= 0;
   const isFirst = seat.key === "first";
   const isFree = seat.price === 0;
+  const lowStock = !isFree && remaining > 0 && remaining <= Math.ceil(seat.capacity / 3);
 
   return (
     <Pressable
@@ -325,9 +326,35 @@ function ClassRow({
               <Text style={styles.perkText}>{p}</Text>
             </View>
           ))}
-          <Text style={[styles.remaining, { marginTop: spacing.sm }]}>
-            {soldOut ? "Sold out" : `${remaining} ${seat.unit}(s) left`}
-          </Text>
+          {seat.key === "economy" ? (
+            <Text style={[styles.remaining, { marginTop: spacing.sm }]}>
+              Free entry · unlimited walk-in
+            </Text>
+          ) : (
+            <View style={[styles.availRow, { marginTop: spacing.sm }]}>
+              <View
+                style={[
+                  styles.availPulseSm,
+                  { backgroundColor: soldOut ? colors.error : lowStock ? colors.brand : colors.success },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.remaining,
+                  { color: soldOut ? colors.error : lowStock ? colors.brand : colors.onSurfaceSecondary },
+                ]}
+              >
+                {soldOut
+                  ? `All ${seat.unit}s booked`
+                  : lowStock
+                    ? `Only ${remaining} ${seat.unit}${remaining > 1 ? "s" : ""} left · selling fast`
+                    : `${remaining} of ${seat.capacity} ${seat.unit}s left`}
+              </Text>
+              {lowStock && !soldOut && (
+                <Ionicons name="flame" size={13} color={colors.brand} />
+              )}
+            </View>
+          )}
         </View>
       )}
     </Pressable>
@@ -522,6 +549,8 @@ const styles = StyleSheet.create({
     color: colors.brandSecondary,
     fontSize: font.sm,
   },
+  availRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  availPulseSm: { width: 7, height: 7, borderRadius: 4 },
   qtyBlock: {
     flexDirection: "row",
     justifyContent: "space-between",

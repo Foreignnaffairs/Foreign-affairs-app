@@ -55,6 +55,21 @@ export default function SeatMap() {
   const unitLabel = isFirst ? "booth" : "table";
   const height = width * RATIO;
 
+  const classSeats = flight.seats.filter((s) => s.class_key === classKey);
+  const availCount = classSeats.filter((s) => s.status === "available").length;
+  const totalCount = classSeats.length;
+  const lowStock = availCount <= Math.ceil(totalCount / 3);
+  const urgent = availCount > 0 && availCount <= 2;
+  const availColor = availCount === 0 ? colors.error : lowStock ? colors.brand : colors.success;
+  const availText =
+    availCount === 0
+      ? `All ${unitLabel}s booked`
+      : urgent
+        ? `Only ${availCount} ${unitLabel}${availCount > 1 ? "s" : ""} left`
+        : lowStock
+          ? `${availCount} of ${totalCount} ${unitLabel}s left · selling fast`
+          : `${availCount} of ${totalCount} ${unitLabel}s available`;
+
   const toggle = (seat: Seat) => {
     if (seat.class_key !== classKey || seat.status === "booked") return;
     Haptics.selectionAsync();
@@ -110,6 +125,15 @@ export default function SeatMap() {
           paddingBottom: 140 + insets.bottom,
         }}
       >
+        {/* Live availability */}
+        <View testID="availability-banner" style={styles.availBanner}>
+          <View style={[styles.availPulse, { backgroundColor: availColor }]} />
+          <Text style={[styles.availText, { color: availColor }]}>{availText}</Text>
+          {(lowStock && availCount > 0) && (
+            <Ionicons name="flame" size={14} color={colors.brand} style={{ marginLeft: 4 }} />
+          )}
+        </View>
+
         {/* Legend */}
         <View style={styles.legend}>
           <LegendDot color={colors.surfaceTertiary} border={colors.brand} label="Available" />
@@ -149,6 +173,7 @@ export default function SeatMap() {
                         borderRadius: seat.class_key === "first" ? 12 : size / 2,
                       },
                       mine ? styles.seatMine : styles.seatOther,
+                      mine && !booked && !isSel && lowStock && styles.seatGlow,
                       booked && styles.seatBooked,
                       isSel && styles.seatSelected,
                     ]}
@@ -285,6 +310,25 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     marginBottom: spacing.md,
   },
+  availBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  availPulse: { width: 8, height: 8, borderRadius: 4 },
+  availText: {
+    fontFamily: fonts.monoBold,
+    fontSize: font.sm,
+    letterSpacing: 0.5,
+  },
   legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
   legendDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 1.5 },
   legendText: {
@@ -330,6 +374,14 @@ const styles = StyleSheet.create({
   seatMine: {
     backgroundColor: colors.surfaceTertiary,
     borderColor: colors.brand,
+  },
+  seatGlow: {
+    borderColor: colors.brandSecondary,
+    shadowColor: colors.brand,
+    shadowOpacity: 0.9,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
   },
   seatOther: {
     backgroundColor: "#161618",
