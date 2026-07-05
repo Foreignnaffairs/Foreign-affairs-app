@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,7 +18,7 @@ import * as Haptics from "expo-haptics";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
 import { colors, fonts, font, spacing, radius, priceLabel } from "@/src/theme";
-import { api, Flight, SeatClass, formatDeparture } from "@/src/api";
+import { api, Flight, SeatClass, formatDeparture, isPast } from "@/src/api";
 
 export default function FlightDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -70,6 +71,7 @@ export default function FlightDetail() {
   const remaining = selected.capacity - selected.booked;
   const soldOut = remaining <= 0;
   const total = selected.price * qty;
+  const past = isPast(flight.departure);
   const { date, time } = formatDeparture(flight.departure);
 
   const book = () => {
@@ -139,118 +141,146 @@ export default function FlightDetail() {
         <View style={styles.body}>
           <Text style={styles.description}>{flight.description}</Text>
 
-          <Text style={styles.sectionLabel}>GENERAL ADMISSION</Text>
-          {flight.classes
-            .filter((c) => c.price === 0)
-            .map((c, i) => (
-              <Animated.View
-                key={c.key}
-                entering={FadeInDown.delay(120 + i * 80).duration(400).springify().damping(18)}
-              >
-                <ClassRow
-                  seat={c}
-                  selected={c.key === selectedKey}
-                  onSelect={() => {
-                    Haptics.selectionAsync();
-                    setSelectedKey(c.key);
-                    setQty(1);
-                  }}
-                />
-              </Animated.View>
-            ))}
-
-          <View style={styles.upgradeHeader}>
-            <Text style={styles.sectionLabel}>TABLES & BOTTLES</Text>
-            <View style={styles.upgradePill}>
-              <Ionicons name="wine" size={12} color={colors.brand} />
-              <Text style={styles.upgradePillText}>UPGRADE</Text>
-            </View>
-          </View>
-          {flight.classes
-            .filter((c) => c.price > 0)
-            .map((c, i) => (
-              <Animated.View
-                key={c.key}
-                entering={FadeInDown.delay(200 + i * 80).duration(400).springify().damping(18)}
-              >
-                <ClassRow
-                  seat={c}
-                  selected={c.key === selectedKey}
-                  onSelect={() => {
-                    Haptics.selectionAsync();
-                    setSelectedKey(c.key);
-                    setQty(1);
-                  }}
-                />
-              </Animated.View>
-            ))}
-
-          {/* Quantity — Economy walk-in only */}
-          {!soldOut && selected.key === "economy" && (
-            <View style={styles.qtyBlock}>
-              <View>
-                <Text style={styles.sectionLabel}>HOW MANY GUESTS</Text>
-                <Text style={styles.remaining}>Free entry · walk-in</Text>
+          {past ? (
+            <View style={styles.pastPanel}>
+              <View style={styles.pastHeadRow}>
+                <Ionicons name="airplane" size={16} color={colors.onSurfaceSecondary} />
+                <Text style={styles.pastHeadText}>THIS FLIGHT HAS LANDED</Text>
               </View>
-              <View style={styles.stepper}>
+              <Text style={styles.pastSub}>
+                {flight.gallery_url
+                  ? "Relive the night — photos from the dancefloor are ready."
+                  : "Thanks for flying with us. Photos from the night are coming soon."}
+              </Text>
+              {!!flight.gallery_url && (
                 <Pressable
-                  testID="qty-decrement"
-                  style={styles.stepBtn}
-                  onPress={() => setQty((q) => Math.max(1, q - 1))}
+                  testID="gallery-button"
+                  style={styles.galleryBtn}
+                  onPress={() => Linking.openURL(flight.gallery_url)}
                 >
-                  <Ionicons name="remove" size={20} color={colors.onSurface} />
+                  <Ionicons name="images" size={18} color={colors.onBrand} />
+                  <Text style={styles.galleryText}>VIEW PHOTOS FROM THE NIGHT</Text>
                 </Pressable>
-                <Text style={styles.qtyText} testID="qty-value">
-                  {qty}
-                </Text>
-                <Pressable
-                  testID="qty-increment"
-                  style={styles.stepBtn}
-                  onPress={() => setQty((q) => Math.min(remaining, q + 1))}
-                >
-                  <Ionicons name="add" size={20} color={colors.onSurface} />
-                </Pressable>
-              </View>
+              )}
             </View>
+          ) : (
+            <>
+              <Text style={styles.sectionLabel}>GENERAL ADMISSION</Text>
+              {flight.classes
+                .filter((c) => c.price === 0)
+                .map((c, i) => (
+                  <Animated.View
+                    key={c.key}
+                    entering={FadeInDown.delay(120 + i * 80).duration(400).springify().damping(18)}
+                  >
+                    <ClassRow
+                      seat={c}
+                      selected={c.key === selectedKey}
+                      onSelect={() => {
+                        Haptics.selectionAsync();
+                        setSelectedKey(c.key);
+                        setQty(1);
+                      }}
+                    />
+                  </Animated.View>
+                ))}
+
+              <View style={styles.upgradeHeader}>
+                <Text style={styles.sectionLabel}>TABLES & BOTTLES</Text>
+                <View style={styles.upgradePill}>
+                  <Ionicons name="wine" size={12} color={colors.brand} />
+                  <Text style={styles.upgradePillText}>UPGRADE</Text>
+                </View>
+              </View>
+              {flight.classes
+                .filter((c) => c.price > 0)
+                .map((c, i) => (
+                  <Animated.View
+                    key={c.key}
+                    entering={FadeInDown.delay(200 + i * 80).duration(400).springify().damping(18)}
+                  >
+                    <ClassRow
+                      seat={c}
+                      selected={c.key === selectedKey}
+                      onSelect={() => {
+                        Haptics.selectionAsync();
+                        setSelectedKey(c.key);
+                        setQty(1);
+                      }}
+                    />
+                  </Animated.View>
+                ))}
+
+              {/* Quantity — Economy walk-in only */}
+              {!soldOut && selected.key === "economy" && (
+                <View style={styles.qtyBlock}>
+                  <View>
+                    <Text style={styles.sectionLabel}>HOW MANY GUESTS</Text>
+                    <Text style={styles.remaining}>Free entry · walk-in</Text>
+                  </View>
+                  <View style={styles.stepper}>
+                    <Pressable
+                      testID="qty-decrement"
+                      style={styles.stepBtn}
+                      onPress={() => setQty((q) => Math.max(1, q - 1))}
+                    >
+                      <Ionicons name="remove" size={20} color={colors.onSurface} />
+                    </Pressable>
+                    <Text style={styles.qtyText} testID="qty-value">
+                      {qty}
+                    </Text>
+                    <Pressable
+                      testID="qty-increment"
+                      style={styles.stepBtn}
+                      onPress={() => setQty((q) => Math.min(remaining, q + 1))}
+                    >
+                      <Ionicons name="add" size={20} color={colors.onSurface} />
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+            </>
           )}
         </View>
       </ScrollView>
 
-      {/* Sticky CTA */}
-      <Animated.View
-        entering={FadeIn.delay(250).duration(400)}
-        style={[styles.cta, { paddingBottom: insets.bottom + spacing.md }]}
-      >
-        <View>
-          <Text style={styles.ctaLabel}>
-            {selected.key === "economy" ? "TOTAL" : `PER ${selected.unit.toUpperCase()}`}
-          </Text>
-          <Text style={styles.ctaTotal}>
-            {selected.key === "economy" ? priceLabel(total) : priceLabel(selected.price)}
-          </Text>
-        </View>
-        <Pressable
-          testID="book-button"
-          disabled={soldOut}
-          onPress={book}
-          style={[styles.bookBtn, soldOut && styles.bookBtnDisabled]}
+      {/* Sticky CTA — hidden for past flights */}
+      {!past && (
+        <Animated.View
+          entering={FadeIn.delay(250).duration(400)}
+          style={[styles.cta, { paddingBottom: insets.bottom + spacing.md }]}
         >
-          <Text style={styles.bookText}>
-            {soldOut
-              ? "SOLD OUT"
-              : selected.key === "economy"
-                ? "BOOK SEAT"
-                : `CHOOSE ${selected.unit.toUpperCase()}`}
-          </Text>
-          {!soldOut && (
-            <Ionicons
-              name={selected.key === "economy" ? "airplane" : "grid"}
-              size={16}
-              color={colors.onBrand}
-            />
-          )}
-        </Pressable>
-      </Animated.View>
+          <View>
+            <Text style={styles.ctaLabel}>
+              {selected.key === "economy" ? "TOTAL" : `PER ${selected.unit.toUpperCase()}`}
+            </Text>
+            <Text style={styles.ctaTotal}>
+              {selected.key === "economy" ? priceLabel(total) : priceLabel(selected.price)}
+            </Text>
+          </View>
+          <Pressable
+            testID="book-button"
+            disabled={soldOut}
+            onPress={book}
+            style={[styles.bookBtn, soldOut && styles.bookBtnDisabled]}
+          >
+            <Text style={styles.bookText}>
+              {soldOut
+                ? "SOLD OUT"
+                : selected.key === "economy"
+                  ? "BOOK SEAT"
+                  : `CHOOSE ${selected.unit.toUpperCase()}`}
+            </Text>
+            {!soldOut && (
+              <Ionicons
+                name={selected.key === "economy" ? "airplane" : "grid"}
+                size={16}
+                color={colors.onBrand}
+              />
+            )}
+          </Pressable>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -448,6 +478,44 @@ const styles = StyleSheet.create({
     fontSize: font.sm,
   },
   body: { paddingHorizontal: spacing.xl },
+  pastPanel: {
+    marginTop: spacing.xl,
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: spacing.xl,
+  },
+  pastHeadRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  pastHeadText: {
+    fontFamily: fonts.monoBold,
+    color: colors.onSurfaceSecondary,
+    fontSize: font.sm,
+    letterSpacing: 2,
+  },
+  pastSub: {
+    fontFamily: fonts.displayMedium,
+    color: colors.onSurfaceTertiary,
+    fontSize: font.lg,
+    lineHeight: 24,
+    marginTop: spacing.md,
+  },
+  galleryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+    backgroundColor: colors.brand,
+    paddingVertical: spacing.md + 2,
+    borderRadius: 999,
+    marginTop: spacing.xl,
+  },
+  galleryText: {
+    fontFamily: fonts.monoBold,
+    color: colors.onBrand,
+    letterSpacing: 1.5,
+    fontSize: font.sm,
+  },
   description: {
     fontFamily: fonts.displayMedium,
     color: colors.onSurfaceTertiary,

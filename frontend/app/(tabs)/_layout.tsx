@@ -4,8 +4,10 @@ import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, View } from "react-native";
 
 import { colors, fonts } from "@/src/theme";
+import { useAdminPin } from "@/src/adminStore";
 
 export default function TabsLayout() {
+  const adminUnlocked = !!useAdminPin();
   return (
     <Tabs
       screenOptions={{
@@ -41,6 +43,16 @@ export default function TabsLayout() {
           title: "My Trips",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="ticket-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: "Crew",
+          href: adminUnlocked ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
           ),
         }}
       />

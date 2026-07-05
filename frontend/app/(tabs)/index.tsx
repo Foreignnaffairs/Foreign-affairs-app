@@ -14,8 +14,12 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors, fonts, font, spacing } from "@/src/theme";
-import { api, Flight } from "@/src/api";
+import { api, Flight, isPast } from "@/src/api";
 import { FlightCard } from "@/src/components/FlightCard";
+
+type Row =
+  | { type: "flight"; flight: Flight; past: boolean }
+  | { type: "section"; title: string };
 
 export default function Departures() {
   const insets = useSafeAreaInsets();
@@ -44,10 +48,28 @@ export default function Departures() {
     }, [load])
   );
 
+  const upcoming = flights.filter((f) => !isPast(f.departure));
+  const past = flights
+    .filter((f) => isPast(f.departure))
+    .sort((a, b) => (a.departure < b.departure ? 1 : -1));
+
+  const rows: Row[] = [
+    ...upcoming.map((f) => ({ type: "flight" as const, flight: f, past: false })),
+    ...(past.length ? [{ type: "section" as const, title: "PAST FLIGHTS" }] : []),
+    ...past.map((f) => ({ type: "flight" as const, flight: f, past: true })),
+  ];
+
   const header = (
     <View style={styles.header}>
       <View style={styles.headerTopRow}>
-        <Text style={styles.kicker}>FOREIGN AFFAIRS</Text>
+        <Text
+          testID="brand-logo"
+          style={styles.kicker}
+          onLongPress={() => router.push("/admin-login")}
+          suppressHighlighting
+        >
+          FOREIGN AFFAIRS
+        </Text>
         <View style={styles.liveDot}>
           <View style={styles.dot} />
           <Text style={styles.liveText}>LIVE</Text>
@@ -55,7 +77,7 @@ export default function Departures() {
       </View>
       <Text style={styles.title}>DEPARTURES</Text>
       <Text style={styles.subtitle}>
-        {flights.length} flight{flights.length === 1 ? "" : "s"} boarding soon ·
+        {upcoming.length} flight{upcoming.length === 1 ? "" : "s"} boarding soon ·
         pick your destination
       </Text>
     </View>
@@ -86,16 +108,27 @@ export default function Departures() {
     <View style={styles.container}>
       <FlatList
         testID="departures-list"
-        data={flights}
-        keyExtractor={(f) => f.id}
+        data={rows}
+        keyExtractor={(item, i) =>
+          item.type === "flight" ? item.flight.id : `section-${i}`
+        }
         ListHeaderComponent={header}
-        renderItem={({ item, index }) => (
-          <FlightCard
-            flight={item}
-            index={index}
-            onPress={() => router.push(`/flight/${item.id}`)}
-          />
-        )}
+        renderItem={({ item, index }) =>
+          item.type === "section" ? (
+            <View style={styles.sectionRow}>
+              <View style={styles.sectionLine} />
+              <Text style={styles.sectionTitle}>{item.title}</Text>
+              <View style={styles.sectionLine} />
+            </View>
+          ) : (
+            <FlightCard
+              flight={item.flight}
+              index={index}
+              past={item.past}
+              onPress={() => router.push(`/flight/${item.flight.id}`)}
+            />
+          )
+        }
         contentContainerStyle={{
           paddingTop: insets.top + spacing.sm,
           paddingHorizontal: spacing.lg,
@@ -121,6 +154,24 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   center: { alignItems: "center", justifyContent: "center" },
   header: { marginBottom: spacing.lg },
+  sectionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+    marginTop: spacing.xs,
+  },
+  sectionLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.borderStrong,
+  },
+  sectionTitle: {
+    fontFamily: fonts.mono,
+    color: colors.onSurfaceSecondary,
+    fontSize: 11,
+    letterSpacing: 2,
+  },
   headerTopRow: {
     flexDirection: "row",
     justifyContent: "space-between",

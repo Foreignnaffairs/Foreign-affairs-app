@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration 3 — Admin PIN-gated CRUD + past-flight/gallery behavior + live availability all verified. Backend: 20/20 pytest PASSED (GET /api/flights returns 5 seed flights sorted asc by departure and includes past 'Seoul FA 019' with drive.google.com gallery_url; POST /api/admin/verify-pin returns {valid:true} for 602214 and {valid:false} for wrong/empty; every admin endpoint — GET/POST /api/admin/flights, PUT/DELETE /api/admin/flights/{id}, POST /api/admin/flights/{id}/reset-seats — returns 401 without a PIN and 401 with wrong PIN, 200 with 602214; admin create obeys the max caps: business_tables 99 clamps to 12 and first_booths 99 clamps to 4 (16 seats total, business/first capacities correct, economy price forced to 0); admin update PRESERVES a booked seat (booked Table 1, updated destination, seat.status still 'booked' and classes.business.booked ≥ 1); reset-seats sets all seats.status='available' and every class.booked=0; DELETE returns {ok:true} and follow-up GET returns 404; DELETE of unknown id → 404; POST /api/bookings on Seoul (past) returns 400 'This flight has already departed'; POST /api/bookings on a freshly-created upcoming flight still works for economy (WALK-IN, total 0) and business (Table 3, total 2500). Frontend (390x844): /admin-login rejects '000000' with 'Incorrect PIN' error and accepts '602214' → dashboard renders admin-list with FA 019 Seoul carrying a LANDED pill and the other 4 flights carrying UPCOMING; ADD NEW FLIGHT opens the form, filling f-destination/f-pilot/f-date/f-time + preset-0 + f-tables=3 + f-booths=2 + save-flight adds 'TEST_UITokyo' to the admin list AND to the guest Departures 'boarding soon' count (now 5); Edit prefills f-destination='TEST_UITokyo', save updates to 'TEST_UITokyoEdited'; Reset seats returns fine; Delete removes the row (cleanup done); lock-button hides the Crew tab (unlock-button shown after lock). Guest side: Departures groups upcoming cards then a 'PAST FLIGHTS' section header, Seoul detail hides book-button, shows 'THIS FLIGHT HAS LANDED' banner + gallery-button labeled 'VIEW PHOTOS FROM THE NIGHT'; upcoming Tokyo detail still shows book-button. Seatmap availability-banner renders '12 of 12 tables available' with the live heat pulse.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "internal RN Web dependency", "issue": "Console warning: 'props.pointerEvents is deprecated. Use style.pointerEvents' (carry-over from iter 1/2, non-blocking, from a dependency not user code)."},
+      {"component": "internal RN Web dependency", "issue": "Console warning: '\"shadow*\" style props are deprecated. Use \"boxShadow\"' — non-blocking, emitted by a dependency (likely react-native-web / expo-linear-gradient)."}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_admin_iter3.py",
+    "/app/backend/tests/test_foreign_affairs.py",
+    "/app/test_reports/pytest/pytest_iter3.xml"
+  ],
+  "action_items": [
+    "No functional fixes required for iteration 3 — admin CRUD, PIN gate, past-flight/gallery behavior, booking guard, and availability banner all pass end-to-end.",
+    "(Carry-over) whichever dependency still uses props.pointerEvents / shadow* style props triggers deprecation warnings — worth upgrading when possible; not blocking.",
+    "(Carry-over) corrupted Space Grotesk .ttf font files still emit web decode warnings; UI falls back to system fonts."
+  ],
+  "critical_code_review_comments": [
+    "server.py: verify_admin_pin uses secrets.compare_digest — good; ADMIN_PIN falls back to '000000' if the env var is missing which would silently weaken auth — consider raising on startup if unset in production.",
+    "server.py build_flight: correctly clamps business_tables to [0,12] and first_booths to [0,4]; economy_price is passed through max(0, ...) — but business_price/first_price accept negatives. Low risk; consider clamping to non-negative for safety.",
+    "server.py create_booking: rejects past flights using ISO string comparison (flight.departure < datetime.now().isoformat()) — this only works because seed data stores timezone-aware ISO with the same offset; works today but string-comparing timestamps is fragile if any writer stores naive/non-Z dates. Consider parsing with fromisoformat before comparing.",
+    "adminStore keeps the PIN in memory (and probably AsyncStorage). Once unlocked, all admin API calls go over HTTPS with header X-Admin-PIN — CORS is '*' but ADMIN_PIN header is only read on admin routes, OK for a demo.",
+    "admin.tsx list card exposes testID admin-flight-<id> plus edit-/reset-/delete- — good, tests were able to target the newly-created flight by scanning card text.",
+    "admin-flight.tsx max-tables/max-booths are enforced only server-side; UI accepts any number in f-tables/f-booths and server clamps. Consider client-side input clamping so guests entering '99' see the effective 12/4 immediately.",
+    "flight/[id].tsx: past flights hide the whole book-button and show the gallery-button — verified. gallery-button uses Linking.openURL (no <a> href), which is why href=None in the DOM; expected for RN Web."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin_iter3.py (new — 20 pytest cases for admin CRUD, PIN, past-flight guard, upcoming booking)"
+  ],
+  "success_rate": {"backend": "100% (20/20 new + prior 18/18 still valid)", "frontend": "100% (admin login, dashboard, create, edit, reset, delete, lock, past-flight banner + gallery, upcoming still bookable, availability banner all verified on 390x844)"},
+  "seed_data_creation": "Backend tests self-clean via a module teardown that deletes every flight they created (TEST_Create1, TEST_Clamp, TEST_Preserve, TEST_Reset, TEST_Delete, TEST_UpcomingBook). UI test flight 'TEST_UITokyo' → renamed to 'TEST_UITokyoEdited' → deleted at the end of the run. One TEST booking on TEST_UpcomingBook (economy walk-in + business Table 3) was left behind when that flight was deleted (the /api/bookings collection isn't cleaned automatically). Prior iteration 2 booked seats on Rio (Table 1), Berlin (first two FC booths), etc. still persist.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All admin flows work end-to-end. Seed flights (Tokyo/Lagos/Berlin/Rio/Seoul) are intact. On web the guest 'onLongPress FOREIGN AFFAIRS' logo entry is NOT triggerable — use /admin-login directly (this matches the request note). f-tables/f-booths accept any integer client-side (server clamps to 12/4); the availability banner testID lives on /seatmap and shows text like 'X of Y tables available'. Run: pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml (both test files together should pass 38/38). Admin PIN 602214 (backend/.env) — do not commit changes to the .env.",
+  "rca_of_issue": "N/A — no defects found this iteration."
+}

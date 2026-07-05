@@ -36,6 +36,7 @@ export type Flight = {
   description: string;
   classes: SeatClass[];
   seats: Seat[];
+  gallery_url: string;
 };
 
 export type Booking = {
@@ -97,6 +98,64 @@ export const api = {
     }),
 };
 
+export type AdminFlightInput = {
+  flight_number?: string;
+  destination: string;
+  tagline: string;
+  pilot: string;
+  genres: string[];
+  venue: string;
+  gate: string;
+  terminal: string;
+  departure: string;
+  duration: string;
+  image_url: string;
+  description: string;
+  gallery_url: string;
+  economy_price: number;
+  business_price: number;
+  first_price: number;
+  economy_capacity: number;
+  business_tables: number;
+  first_booths: number;
+};
+
+function adminHeaders(pin: string) {
+  return { "Content-Type": "application/json", "X-Admin-PIN": pin };
+}
+
+export const adminApi = {
+  verifyPin: (pin: string) =>
+    req<{ valid: boolean }>("/admin/verify-pin", {
+      method: "POST",
+      body: JSON.stringify({ pin }),
+    }),
+  listFlights: (pin: string) =>
+    req<Flight[]>("/admin/flights", { headers: adminHeaders(pin) }),
+  createFlight: (pin: string, body: AdminFlightInput) =>
+    req<Flight>("/admin/flights", {
+      method: "POST",
+      headers: adminHeaders(pin),
+      body: JSON.stringify(body),
+    }),
+  updateFlight: (pin: string, id: string, body: AdminFlightInput) =>
+    req<Flight>(`/admin/flights/${id}`, {
+      method: "PUT",
+      headers: adminHeaders(pin),
+      body: JSON.stringify(body),
+    }),
+  deleteFlight: (pin: string, id: string) =>
+    req<{ ok: boolean }>(`/admin/flights/${id}`, {
+      method: "DELETE",
+      headers: adminHeaders(pin),
+    }),
+  resetSeats: (pin: string, id: string) =>
+    req<Flight>(`/admin/flights/${id}/reset-seats`, {
+      method: "POST",
+      headers: adminHeaders(pin),
+    }),
+};
+
 export function formatDeparture(iso: string) {
   const d = new Date(iso);
   const date = d.toLocaleDateString("en-US", {
@@ -109,4 +168,8 @@ export function formatDeparture(iso: string) {
     hour12: false,
   });
   return { date: date.toUpperCase(), time };
+}
+
+export function isPast(iso: string) {
+  return new Date(iso).getTime() < Date.now();
 }

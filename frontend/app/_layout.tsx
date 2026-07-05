@@ -54,6 +54,8 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="checkout" options={{ presentation: "card" }} />
+          <Stack.Screen name="admin-login" options={{ presentation: "modal" }} />
+          <Stack.Screen name="admin-flight" options={{ presentation: "card" }} />
           <Stack.Screen
             name="confirmation"
             options={{ animation: "fade", gestureEnabled: false }}

@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.emergent.seatreserve.q0yibg"
+      "bundleIdentifier": "com.emergent.seatreserve.q0yibg",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Add cover photos to your events"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +21,8 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.emergent.seatreserve.q0yibg"
+      "package": "com.emergent.seatreserve.q0yibg",
+      "permissions": ["READ_MEDIA_IMAGES"]
     },
     "web": {
       "bundler": "metro",

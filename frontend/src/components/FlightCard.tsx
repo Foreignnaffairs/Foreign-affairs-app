@@ -19,9 +19,10 @@ type Props = {
   flight: Flight;
   onPress: () => void;
   index: number;
+  past?: boolean;
 };
 
-function FlightCardBase({ flight, onPress, index }: Props) {
+function FlightCardBase({ flight, onPress, index, past }: Props) {
   const { date, time } = formatDeparture(flight.departure);
   const fromPrice = Math.min(...flight.classes.map((c) => c.price));
 
@@ -60,9 +61,15 @@ function FlightCardBase({ flight, onPress, index }: Props) {
         <View style={styles.badge}>
           <Text style={styles.flightNo}>{flight.flight_number}</Text>
         </View>
-        <Text style={styles.dateText}>
-          {date} · {time}
-        </Text>
+        {past ? (
+          <View style={styles.landedBadge}>
+            <Text style={styles.landedText}>● LANDED</Text>
+          </View>
+        ) : (
+          <Text style={styles.dateText}>
+            {date} · {time}
+          </Text>
+        )}
       </View>
 
       {/* Bottom content */}
@@ -81,9 +88,15 @@ function FlightCardBase({ flight, onPress, index }: Props) {
             <Text style={styles.metaValue}>{flight.gate}</Text>
           </View>
           <View style={[styles.metaItem, { alignItems: "flex-end", flex: 0 }]}>
-            <Text style={styles.metaLabel}>FROM</Text>
+            <Text style={styles.metaLabel}>{past ? "GALLERY" : "FROM"}</Text>
             <Text style={styles.priceValue}>
-              {fromPrice === 0 ? "FREE" : "₱" + fromPrice.toLocaleString("en-PH")}
+              {past
+                ? flight.gallery_url
+                  ? "PHOTOS"
+                  : "RECAP"
+                : fromPrice === 0
+                  ? "FREE"
+                  : "₱" + fromPrice.toLocaleString("en-PH")}
             </Text>
           </View>
         </View>
@@ -131,6 +144,20 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     fontSize: font.sm,
     letterSpacing: 0.5,
+  },
+  landedBadge: {
+    backgroundColor: "rgba(9,9,11,0.55)",
+    borderColor: colors.onSurfaceSecondary,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
+    borderRadius: radius.sm,
+  },
+  landedText: {
+    fontFamily: fonts.monoBold,
+    color: colors.onSurfaceSecondary,
+    fontSize: 10,
+    letterSpacing: 1.5,
   },
   bottom: {
     marginTop: "auto",
