@@ -1,0 +1,33 @@
+{
+  "summary": "Full MVP validation of Foreign Affairs flight-booking app. Backend: 13/13 pytest tests PASSED (flights list sorted, single flight, 3 classes each, seed = Tokyo/Lagos/Berlin/Rio; booking create for economy(qty=2) & business(qty=1), decrement verified via GET flight, 400 invalid class, 404 unknown flight, 409 overbook, GET bookings by phone, GET booking by id, 404 unknown booking). Frontend E2E on mobile viewport 390x844: Departures list renders 4 cards -> tap opens flight detail -> class-business selectable + qty stepper (1<->2) works -> Book Seat navigates to Checkout -> name+phone accepted -> Confirm & Pay creates booking (mock 1.2s delay) and navigates to Confirmation -> boarding pass renders with reference (e.g. FAVIZ1F2) + seat label + PAID amount -> tapping VIEW MY TRIPS shows the boarding pass in My Trips (phone persisted). After clearing localStorage, empty state lookup-by-phone flow also successfully retrieves the booking. Only issue observed: repeated console warnings 'Failed to decode downloaded font: SpaceGrotesk-Medium/Bold.ttf, OTS parsing error: invalid sfntVersion: 168430090' — custom fonts fail to load in the web preview (fallback fonts render, so UI is still legible), and a deprecation warning 'props.pointerEvents is deprecated' from an internal library.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "all screens", "issues": ["Custom Space Grotesk font files (SpaceGrotesk-Medium.ttf, SpaceGrotesk-Bold.ttf) fail to decode in web preview with 'OTS parsing error: invalid sfntVersion: 168430090'. Likely the font asset files are corrupted, are LFS pointer files, or the wrong format. The UI falls back to system fonts and remains readable, but the intended premium boarding-pass typography is not shown on web preview. Recommend re-downloading the .ttf files from Google Fonts or using @expo-google-fonts/space-grotesk."]}
+    ],
+    "react_native_issues": [
+      {"component": "internal (likely expo-linear-gradient / RN Web)", "issue": "Console warning: 'props.pointerEvents is deprecated. Use style.pointerEvents' — deprecation from a dependency; not from user code, but worth pinning versions or filing upstream. Non-blocking."}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_foreign_affairs.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Fix corrupted font files at /app/frontend/assets/fonts/SpaceGrotesk-Medium.ttf and SpaceGrotesk-Bold.ttf (OTS parsing error suggests they are invalid). Consider switching to @expo-google-fonts/space-grotesk for reliability.",
+    "Optional: investigate 'props.pointerEvents is deprecated' warning source and update the offending package.",
+    "Optional hardening: backend does not currently validate quantity < 1 via Pydantic (guarded manually with HTTPException 400); consider using Field(ge=1) — currently works but earlier validation is cleaner."
+  ],
+  "critical_code_review_comments": [
+    "server.py: uses @app.on_event('startup')/shutdown' which are deprecated in FastAPI; prefer lifespan handler. Non-blocking.",
+    "server.py: seed insertion runs only when collection is empty — good. Departures are relative to seed time, so on stale DB dates may be in the past; acceptable for MVP.",
+    "api.ts: uses process.env.EXPO_PUBLIC_BACKEND_URL correctly. No hardcoded URLs.",
+    "All interactive elements have testID (flight-card-<id>, class-economy/business/first, qty-increment/decrement, book-button, input-name, input-phone, confirm-button, done-button, share-button, home-button, lookup-phone-input, lookup-button, trips-list, departures-list, retry-button, checkout-back, back-button). Excellent testability."
+  ],
+  "updated_files": ["/app/backend/tests/test_foreign_affairs.py (new)"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Created 3 TEST bookings under phone '+639170000TEST' via API tests and 1 booking under '+639170099001' via UI E2E flow. These minimally decrement seat availability on flights 0-2. No cleanup performed (persistent).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All flows work end-to-end. Only lingering issue is corrupted Space Grotesk font files causing web-preview font-decode warnings; UI still functions via fallback fonts. Backend tests live at /app/backend/tests/test_foreign_affairs.py and can be re-run with: pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml.",
+  "rca_of_issue": "Font asset issue RCA: Chromium reports 'OTS parsing error: invalid sfntVersion: 168430090' (0x0A0A0A0A) which is a classic signature of the file being an ASCII text file (likely a Git LFS pointer or corrupted download) rather than a real binary TTF. Mitigation: replace the .ttf files with valid binaries (e.g. re-download from Google Fonts or use @expo-google-fonts/space-grotesk which is already reliable in Expo)."
+}
